@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mavis / KOOPS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #0B0B0C;
+    --ink: #EDEAE4;
+    --ink-dim: #8C8A85;
+    --red: #E3222E;
+    --line: rgba(237,234,228,0.16);
+  }
+
+  *{ box-sizing:border-box; }
+
+  html,body{
+    margin:0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  body{
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    position:relative;
+    overflow-x:hidden;
+  }
+
+  body::before{
+    content:"";
+    position:fixed;
+    inset:0;
+    pointer-events:none;
+    opacity:0.06;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    mix-blend-mode: overlay;
+  }
+
+  .page{
+    width:100%;
+    max-width:440px;
+    padding: 56px 24px 60px;
+    position:relative;
+    z-index:1;
+  }
+
+  .tag{
+    font-size:11px;
+    letter-spacing:0.25em;
+    text-transform:uppercase;
+    color: var(--ink-dim);
+    text-align:center;
+    margin-bottom:22px;
+  }
+
+  .tag span{ color: var(--red); }
+
+  h1{
+    font-family:'Anton', sans-serif;
+    font-weight:400;
+    text-transform:uppercase;
+    font-size:clamp(52px, 15vw, 72px);
+    line-height:0.88;
+    letter-spacing:0.01em;
+    text-align:center;
+    margin:0;
+  }
+
+  h1 .x{
+    color: var(--red);
+    font-size:0.5em;
+    display:block;
+    letter-spacing:0.3em;
+    margin: 6px 0;
+  }
+
+  .sub{
+    text-align:center;
+    font-size:15px;
+    letter-spacing:0.02em;
+    color: var(--ink);
+    line-height:1.6;
+    max-width:280px;
+    margin: 0 auto;
+  }
+
+  .rule.thick{
+    height:3px;
+    background: var(--ink);
+    margin: 34px 0 4px;
+  }
+
+  .label-row{
+    display:flex;
+    justify-content:space-between;
+    align-items:baseline;
+    font-size:10.5px;
+    letter-spacing:0.2em;
+    text-transform:uppercase;
+    color: var(--ink-dim);
+    margin-bottom:22px;
+  }
+
+  .links{
+    display:flex;
+    flex-direction:column;
+  }
+
+  .link-row{
+    display:flex;
+    align-items:baseline;
+    gap:16px;
+    padding: 18px 0;
+    border-bottom: 1px solid var(--line);
+    text-decoration:none;
+    color: var(--ink);
+    position:relative;
+  }
+
+  .link-row:first-child{
+    border-top: 1px solid var(--line);
+  }
+
+  .idx{
+    font-size:12px;
+    color: var(--ink-dim);
+    flex:none;
+    width:22px;
+  }
+
+  .link-body{ flex:1; min-width:0; }
+
+  .link-title{
+    font-family:'Anton', sans-serif;
+    text-transform:uppercase;
+    font-size:19px;
+    letter-spacing:0.01em;
+    margin-bottom:3px;
+    transition: color 0.15s ease;
+  }
+
+  .link-sub{
+    font-size:11px;
+    color: var(--ink-dim);
+    letter-spacing:0.02em;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+
+  .link-go{
+    flex:none;
+    font-size:13px;
+    color: var(--ink-dim);
+    transition: transform 0.15s ease, color 0.15s ease;
+  }
+
+  .link-row:hover .link-title,
+  .link-row:focus-visible .link-title{ color: var(--red); }
+  .link-row:hover .link-go,
+  .link-row:focus-visible .link-go{ color: var(--red); transform: translateX(3px); }
+  .link-row:focus-visible{ outline: none; }
+
+  footer{
+    margin-top:48px;
+    text-align:center;
+  }
+
+  footer .credit{
+    margin-top:16px;
+    font-size:10.5px;
+    color: var(--ink-dim);
+    letter-spacing:0.05em;
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .link-title, .link-go{ transition:none; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <p class="sub">Find me elsewhere too.</p>
+
+  <div class="rule thick"></div>
+  <div class="label-row">
+    <span>Setlist</span>
+    <span id="count"></span>
+  </div>
+
+  <nav class="links" id="linkList"></nav>
+
+  <footer>
+    <div class="credit">© <span id="year"></span> KOOPS MEDIA</div>
+  </footer>
+</div>
+
+<script>
+  // Edit array di bawah untuk menambah / mengubah / menghapus tautan.
+  const links = [
+    {
+      title: "KOOPS Media",
+      sub: "koopsmedia.vercel.app",
+      url: "https://koopsmedia.vercel.app"
+    },
+    {
+      title: "Instagram",
+      sub: "@noopaall",
+      url: "https://instagram.com/noopaall"
+    },
+    {
+      title: "Roblox",
+      sub: "Roblox Profile",
+      url: "https://www.roblox.com/share-links?code=6d936908a835984e91044f253133a300&type=Profile&source=ProfileShare"
+    },
+    {
+      title: "Spotify",
+      sub: "Spotify Profile",
+      url: "https://open.spotify.com/user/9ryrfp3gl9ubpwzn7dc41yyeu"
+    },
+    {
+      title: "TikTok",
+      sub: "@mavisssjoy",
+      url: "https://tiktok.com/@mavisssjoy"
+    },
+    {
+      title: "Letterboxd",
+      sub: "@noopaall",
+      url: "https://letterboxd.com/noopaall/"
+    }
+  ];
+
+  const pad = n => String(n).padStart(2, '0');
+
+  document.getElementById('linkList').innerHTML = links.map((l, i) => `
+    <a class="link-row" href="${l.url}" target="_blank" rel="noopener noreferrer">
+      <span class="idx">${pad(i + 1)}</span>
+      <span class="link-body">
+        <div class="link-title">${l.title}</div>
+        <div class="link-sub">${l.sub}</div>
+      </span>
+      <span class="link-go">→</span>
+    </a>
+  `).join('');
+
+  document.getElementById('count').textContent = pad(links.length) + ' TRACKS';
+  document.getElementById('year').textContent = new Date().getFullYear();
+</script>
+</body>
+</html>
